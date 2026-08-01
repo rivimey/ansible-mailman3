@@ -1,5 +1,16 @@
 # This file is imported by the Mailman Suite. It is used to override
 # the default settings from {{ mailman3_django_project_dir }}/settings.py.
+import os
+from pathlib import Path
+
+BASE_DIR = Path('/opt/mailman3/var/web')
+
+# Get the default settings.
+from mailman_web.settings.base import ROOT_URLCONF, INSTALLED_APPS, MIDDLEWARE, TEMPLATES, WSGI_APPLICATION, STATICFILES_FINDERS, AUTH_PASSWORD_VALIDATORS, STATICFILES_FINDERS, LOGIN_URL, LOGIN_REDIRECT_URL, LOGOUT_URL, EMAIL_BACKEND, MESSAGE_TAGS, DEFAULT_AUTO_FIELD
+
+from mailman_web.settings.mailman import COMPRESS_PRECOMPILERS, AUTHENTICATION_BACKENDS, Q_CLUSTER
+
+DEBUG = False
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "{{ __mailman3_django_config_merged.secret_key | default('change-this-on-your-production-server') }}"
@@ -17,6 +28,12 @@ SITE_ID = {{ __mailman3_django_config_merged.site_id | default(1) }}
 # See https://docs.djangoproject.com/en/1.8/ref/settings/#allowed-hosts
 ALLOWED_HOSTS = [
 {% for host in __mailman3_django_config_merged.allowed_hosts |unique %}
+    "{{ host }}",
+{% endfor %}
+]
+
+CSRF_TRUSTED_ORIGINS = [
+{% for host in __mailman3_django_config_merged.csrf_trusted_origins |unique %}
     "{{ host }}",
 {% endfor %}
 ]
@@ -71,7 +88,15 @@ DATABASES = {
 {% for key in __mailman3_django_config_merged.databases | sort %}
     '{{ key }}': {
 {% for opt in __mailman3_django_config_merged.databases[key] | sort %}
-        '{{ opt }}': '{{ __mailman3_django_config_merged.databases[key][opt] }}',
+        '{{ opt }}':
+		{% set dbval = __mailman3_django_config_merged.databases[key][opt] %}
+		{% if not mapping(dbval) %}
+			'{{ dbval }}'
+		{% else %}{
+			{% for dbopt_k in dbval %}
+				'{{ dbval }}':'{{ dbval[dbopt_k] }}',
+			{% endfor %}}
+		{% endif %}
 {% endfor %}
     }
 {% endfor %}
@@ -104,14 +129,19 @@ SECURE_PROXY_SSL_HEADER = ('{{ __mailman3_django_config_merged.secure_proxy_ssl_
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 
+#: Default Language code.
 LANGUAGE_CODE = '{{ mailman3_language_code }}'
 
+#: Default timezone.
 TIME_ZONE = '{{ __mailman3_django_config_merged.time_zone | default("UTC") }}'
 
+#: Enable internationalization.
 USE_I18N = True
 
+#: Enable localization.
 USE_L10N = True
 
+#: Use the timezone information.
 USE_TZ = True
 
 
@@ -214,5 +244,6 @@ FILTER_VHOST = False
 {% if __mailman3_django_config_merged.hyperkitty_attachment_folder is defined %}
 HYPERKITTY_ATTACHMENT_FOLDER = '{{ __mailman3_django_config_merged.hyperkitty_attachment_folder }}'
 {% endif %}
+
 
 POSTORIUS_TEMPLATE_BASE_URL = '{{ mailman3_postorius_url }}'

@@ -154,7 +154,7 @@ mailman3_django_log_dir: "{{ mailman3_install_dir }}/var/web/log"
 mailman3_django_settings_file: "{{ mailman3_install_dir }}/etc/django-settings.py"
 
 # As part of a pathname:
-mailman3_python_version: python3.10
+mailman3_python_version: python3.12
 
 # Basic setup:
 mailman3_web_user: "www-data"

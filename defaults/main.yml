@@ -42,7 +42,7 @@ mailman3_uwsgi_static: no
 #mailman3_virtualenv_command: python3 -m venv
 mailman3_virtualenv_command: virtualenv
 # As part of a pathname:
-mailman3_python_version: python3.8
+mailman3_python_version: python3.12
 
 __mailman3_debian: "{{ ansible_os_family == 'Debian' }}"
 __mailman3_redhat: "{{ ansible_os_family == 'RedHat' }}"
@@ -120,7 +120,7 @@ __mailman3_debian_system_dependency_packages_common:
   - uwsgi
   - uwsgi-plugin-python3
   - python3-setuptools
-#  - python3-venv
+  - python3-virtualenv
 
 __mailman3_debian_system_dependency_packages: >-
   {{
